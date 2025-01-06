@@ -1,0 +1,122 @@
+<template>
+  <div class="ripple">
+    <div class="item">
+      <span :class="{shadow: hasShadow}"></span>
+      <span :class="brushType" :style="{'--i': index}" v-for="(n, index) in number" :key="n"></span>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'RippleEffect',
+  props: {
+    symbolSize: {
+      type: Number,
+      default: 10
+    },
+    symbolShadow: {
+      type: Object,
+      default: () => {
+        return {
+          blur: 0,
+          color: '#333'
+        }
+      }
+    },
+    color: {
+      type: String,
+      default: '#b02a02' // 涟漪颜色 #b02a02 #ddb926 #91cc75
+    },
+    number: {
+      type: Number,
+      default: 3 // 波纹数
+    },
+    duration: {
+      type: Number,
+      default: 4 // 涟漪持续时长，单位：秒
+    },
+    scale: {
+      type: Number,
+      default: 2.5 // 波纹的最大缩放比例
+    },
+    brushType: {
+      type: String,
+      default: 'fill' // 波纹的绘制方式，可选值：'fill' - 填充, 'stroke' - 描边
+    }
+  },
+  data() {
+    return {
+      hasShadow: false
+    }
+  },
+  mounted() {
+    this.$el.style.setProperty('--ripple-symbol-size', this.symbolSize + 'px')
+    this.$el.style.setProperty('--ripple-color', this.color)
+    this.$el.style.setProperty('--ripple-duration', this.duration + 's')
+    this.$el.style.setProperty('--ripple-delay', this.duration / this.number + 's')
+    this.$el.style.setProperty('--ripple-scale-size', this.symbolSize * this.scale + 'px')
+
+    if (this.symbolShadow.blur > 0) {
+      this.hasShadow = true
+      this.$el.style.setProperty('--ripple-symbol-shadow-blur', this.symbolShadow.blur + 'px')
+      this.$el.style.setProperty('--ripple-symbol-shadow-color', this.symbolShadow.color)
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.ripple {
+  --ripple-symbol-size: 10px;
+  --ripple-symbol-shadow-blur: 0px;
+  --ripple-symbol-shadow-color: '#333';
+  --ripple-color: #b02a02;
+  --ripple-duration: 4s;
+  --ripple-delay: 0s;
+  --ripple-scale-size: 25px;
+
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  .item {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+    span {
+      position: absolute;
+      box-sizing: border-box;
+      border: 1px solid var(--ripple-color);
+      border-radius: 50%;
+      background: var(--ripple-color);
+      width: var(--ripple-symbol-size);
+      height: var(--ripple-symbol-size);
+      &.shadow {
+        box-shadow: 0px 0px var(--ripple-symbol-shadow-blur) var(--ripple-symbol-shadow-color);
+      }
+      &:not(:first-child) {
+        animation: animate var(--ripple-duration) linear infinite;
+        animation-delay: calc(var(--ripple-delay) * var(--i));
+        &.stroke {
+          background: transparent;
+        }
+      }
+    }
+  }
+  @keyframes animate {
+    80% {
+      opacity: 0.3;
+    }
+    100% {
+      width: var(--ripple-scale-size);
+      height: var(--ripple-scale-size);
+      opacity: 0;
+    }
+  }
+}
+</style>
